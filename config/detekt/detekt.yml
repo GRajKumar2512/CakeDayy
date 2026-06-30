@@ -1,0 +1,25 @@
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+naming:
+  FunctionNaming:
+    # Composable functions use PascalCase by convention
+    ignoreAnnotated: ['Composable']
+
+style:
+  UnusedPrivateMember:
+    # @Preview composables are used by the IDE, not by code
+    ignoreAnnotated: ['Preview']
+  WildcardImport:
+    active: true
+    excludeImports:
+      - 'kotlinx.coroutines.*'
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
