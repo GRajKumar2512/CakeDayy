@@ -81,4 +81,12 @@ class PeopleViewModelTest {
             assertEquals(PeopleEffect.NavigateToEdit(42L), awaitItem())
         }
     }
+
+    @Test
+    fun `settings click emits NavigateToSettings effect`() = runTest {
+        viewModel.effect.test {
+            viewModel.onSettingsClick()
+            assertEquals(PeopleEffect.NavigateToSettings, awaitItem())
+        }
+    }
 }
