@@ -8,6 +8,8 @@ import com.pocketaps.cakeday.feature.editperson.navigation.EditPersonRoute
 import com.pocketaps.cakeday.feature.editperson.navigation.editPersonScreen
 import com.pocketaps.cakeday.feature.people.navigation.PeopleRoute
 import com.pocketaps.cakeday.feature.people.navigation.peopleScreen
+import com.pocketaps.cakeday.feature.settings.navigation.SettingsRoute
+import com.pocketaps.cakeday.feature.settings.navigation.settingsScreen
 
 @Composable
 fun CakeDayyNavHost(navController: NavHostController = rememberNavController()) {
@@ -15,8 +17,12 @@ fun CakeDayyNavHost(navController: NavHostController = rememberNavController()) 
         peopleScreen(
             onAddPerson = { navController.navigate(EditPersonRoute()) },
             onEditPerson = { personId -> navController.navigate(EditPersonRoute(personId = personId)) },
+            onOpenSettings = { navController.navigate(SettingsRoute) },
         )
         editPersonScreen(
+            onNavigateBack = { navController.popBackStack() },
+        )
+        settingsScreen(
             onNavigateBack = { navController.popBackStack() },
         )
     }
