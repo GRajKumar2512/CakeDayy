@@ -11,4 +11,12 @@ sealed interface PeopleUiState {
 sealed interface PeopleEffect {
     data object NavigateToAdd : PeopleEffect
     data class NavigateToEdit(val personId: Long) : PeopleEffect
+    data object NavigateToSettings : PeopleEffect
 }
+
+data class PeopleActions(
+    val onAddClick: () -> Unit,
+    val onPersonClick: (Long) -> Unit,
+    val onDeleteClick: (Long) -> Unit,
+    val onSettingsClick: () -> Unit,
+)

@@ -6,6 +6,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.pocketaps.cakeday.feature.people.PeopleActions
 import com.pocketaps.cakeday.feature.people.PeopleEffect
 import com.pocketaps.cakeday.feature.people.PeopleScreen
 import com.pocketaps.cakeday.feature.people.PeopleViewModel
@@ -17,6 +18,7 @@ data object PeopleRoute
 fun NavGraphBuilder.peopleScreen(
     onAddPerson: () -> Unit,
     onEditPerson: (Long) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     composable<PeopleRoute> {
         val viewModel = hiltViewModel<PeopleViewModel>()
@@ -27,15 +29,19 @@ fun NavGraphBuilder.peopleScreen(
                 when (effect) {
                     PeopleEffect.NavigateToAdd -> onAddPerson()
                     is PeopleEffect.NavigateToEdit -> onEditPerson(effect.personId)
+                    PeopleEffect.NavigateToSettings -> onOpenSettings()
                 }
             }
         }
 
         PeopleScreen(
             state = state,
-            onAddClick = viewModel::onAddClick,
-            onPersonClick = viewModel::onPersonClick,
-            onDeleteClick = viewModel::onDeletePerson,
+            actions = PeopleActions(
+                onAddClick = viewModel::onAddClick,
+                onPersonClick = viewModel::onPersonClick,
+                onDeleteClick = viewModel::onDeletePerson,
+                onSettingsClick = viewModel::onSettingsClick,
+            ),
         )
     }
 }

@@ -9,13 +9,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,15 +36,23 @@ import com.pocketaps.cakeday.core.ui.PersonRow
 @Composable
 fun PeopleScreen(
     state: PeopleUiState,
-    onAddClick: () -> Unit,
-    onPersonClick: (Long) -> Unit,
-    onDeleteClick: (Long) -> Unit,
+    actions: PeopleActions,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text("CakeDayy") },
+                actions = {
+                    IconButton(onClick = actions.onSettingsClick) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
+                },
+            )
+        },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddClick) {
+            FloatingActionButton(onClick = actions.onAddClick) {
                 Icon(Icons.Default.Add, contentDescription = "Add person")
             }
         },
@@ -61,38 +73,58 @@ fun PeopleScreen(
                 modifier = Modifier.padding(contentPadding),
             )
 
-            is PeopleUiState.Content -> LazyColumn(
+            is PeopleUiState.Content -> PeopleList(
+                people = state.people,
+                actions = actions,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(contentPadding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(state.people, key = { it.person.id }) { upcomingBirthday ->
-                    val dismissState = rememberSwipeToDismissBoxState(
-                        confirmValueChange = { value ->
-                            if (value != SwipeToDismissBoxValue.Settled) {
-                                onDeleteClick(upcomingBirthday.person.id)
-                                true
-                            } else {
-                                false
-                            }
-                        },
-                    )
-                    SwipeToDismissBox(
-                        state = dismissState,
-                        backgroundContent = {},
-                    ) {
-                        PersonRow(
-                            upcomingBirthday = upcomingBirthday,
-                            onClick = { onPersonClick(upcomingBirthday.person.id) },
-                        )
+            )
+        }
+    }
+}
+
+@Composable
+private fun PeopleList(
+    people: List<UpcomingBirthday>,
+    actions: PeopleActions,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(people, key = { it.person.id }) { upcomingBirthday ->
+            val dismissState = rememberSwipeToDismissBoxState(
+                confirmValueChange = { value ->
+                    if (value != SwipeToDismissBoxValue.Settled) {
+                        actions.onDeleteClick(upcomingBirthday.person.id)
+                        true
+                    } else {
+                        false
                     }
-                }
+                },
+            )
+            SwipeToDismissBox(
+                state = dismissState,
+                backgroundContent = {},
+            ) {
+                PersonRow(
+                    upcomingBirthday = upcomingBirthday,
+                    onClick = { actions.onPersonClick(upcomingBirthday.person.id) },
+                )
             }
         }
     }
 }
+
+private val previewActions = PeopleActions(
+    onAddClick = {},
+    onPersonClick = {},
+    onDeleteClick = {},
+    onSettingsClick = {},
+)
 
 @Preview(showBackground = true)
 @Composable
@@ -100,9 +132,7 @@ private fun PeopleScreenLoadingPreview() {
     CakeDayyTheme {
         PeopleScreen(
             state = PeopleUiState.Loading,
-            onAddClick = {},
-            onPersonClick = {},
-            onDeleteClick = {},
+            actions = previewActions,
         )
     }
 }
@@ -113,9 +143,7 @@ private fun PeopleScreenEmptyPreview() {
     CakeDayyTheme {
         PeopleScreen(
             state = PeopleUiState.Empty,
-            onAddClick = {},
-            onPersonClick = {},
-            onDeleteClick = {},
+            actions = previewActions,
         )
     }
 }
@@ -139,9 +167,7 @@ private fun PeopleScreenContentPreview() {
                     ),
                 ),
             ),
-            onAddClick = {},
-            onPersonClick = {},
-            onDeleteClick = {},
+            actions = previewActions,
         )
     }
 }

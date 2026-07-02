@@ -40,6 +40,10 @@ class PeopleViewModel @Inject constructor(
         viewModelScope.launch { effectChannel.send(PeopleEffect.NavigateToEdit(personId)) }
     }
 
+    fun onSettingsClick() {
+        viewModelScope.launch { effectChannel.send(PeopleEffect.NavigateToSettings) }
+    }
+
     fun onDeletePerson(personId: Long) {
         viewModelScope.launch { deletePerson(personId) }
     }
