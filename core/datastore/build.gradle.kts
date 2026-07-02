@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.cakeday.android.library)
+    alias(libs.plugins.cakeday.android.hilt)
 }
 
 android {
