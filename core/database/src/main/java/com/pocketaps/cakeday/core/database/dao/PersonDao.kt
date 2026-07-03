@@ -17,4 +17,7 @@ interface PersonDao {
 
     @Query("UPDATE person SET isDeleted = 1, updatedAt = :updatedAt WHERE id = :id")
     suspend fun softDelete(id: Long, updatedAt: Long)
+
+    @Query("UPDATE person SET groupId = NULL, updatedAt = :updatedAt WHERE groupId = :groupId")
+    suspend fun clearGroupAssignments(groupId: Long, updatedAt: Long)
 }

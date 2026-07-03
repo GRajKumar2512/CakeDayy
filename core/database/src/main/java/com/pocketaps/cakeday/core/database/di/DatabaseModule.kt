@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.pocketaps.cakeday.core.database.CakeDayyDatabase
 import com.pocketaps.cakeday.core.database.dao.PersonDao
+import com.pocketaps.cakeday.core.database.migration.MIGRATION_1_2
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,7 +19,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): CakeDayyDatabase =
-        Room.databaseBuilder(context, CakeDayyDatabase::class.java, "cakeday.db").build()
+        Room.databaseBuilder(context, CakeDayyDatabase::class.java, "cakeday.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     @Provides
     @Singleton
