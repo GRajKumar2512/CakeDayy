@@ -2,9 +2,12 @@ package com.pocketaps.cakeday.feature.editperson
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import com.pocketaps.cakeday.core.domain.usecase.ObserveGroupsUseCase
 import com.pocketaps.cakeday.core.domain.usecase.ObservePersonUseCase
 import com.pocketaps.cakeday.core.domain.usecase.SavePersonUseCase
+import com.pocketaps.cakeday.core.model.Group
 import com.pocketaps.cakeday.core.model.Person
+import com.pocketaps.cakeday.core.testing.fake.FakeGroupRepository
 import com.pocketaps.cakeday.core.testing.fake.FakePersonRepository
 import com.pocketaps.cakeday.core.testing.rule.MainDispatcherRule
 import kotlinx.coroutines.flow.first
@@ -22,11 +25,13 @@ class EditPersonViewModelTest {
     private fun createViewModel(
         personId: Long? = null,
         fakeRepo: FakePersonRepository = FakePersonRepository(),
+        fakeGroupRepo: FakeGroupRepository = FakeGroupRepository(),
     ): EditPersonViewModel {
         val savedStateHandle = SavedStateHandle(mapOf("personId" to personId))
         return EditPersonViewModel(
             savedStateHandle = savedStateHandle,
             observePerson = ObservePersonUseCase(fakeRepo),
+            observeGroups = ObserveGroupsUseCase(fakeGroupRepo),
             savePerson = SavePersonUseCase(fakeRepo),
         )
     }
@@ -100,5 +105,23 @@ class EditPersonViewModelTest {
         val saved = fakeRepo.observeAll().first()
         assertEquals(1, saved.size)
         assertEquals("Alice", saved[0].name)
+    }
+
+    @Test
+    fun `selecting a group persists it on save`() = runTest {
+        val fakeRepo = FakePersonRepository()
+        val fakeGroupRepo = FakeGroupRepository().apply {
+            setAll(listOf(Group(id = 1L, name = "Family", colorHex = "#F44336")))
+        }
+        val viewModel = createViewModel(personId = null, fakeRepo = fakeRepo, fakeGroupRepo = fakeGroupRepo)
+        viewModel.onNameChange("Alice")
+        viewModel.onMonthChange(5)
+        viewModel.onDayChange(10)
+        viewModel.onGroupSelected(1L)
+
+        viewModel.onSaveClick()
+
+        val saved = fakeRepo.observeAll().first()
+        assertEquals(1L, saved[0].groupId)
     }
 }

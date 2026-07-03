@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pocketaps.cakeday.core.designsystem.CakeDayyTheme
 import com.pocketaps.cakeday.core.designsystem.components.CakeDayyButton
+import com.pocketaps.cakeday.core.model.Group
 import java.time.Month
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -81,6 +82,13 @@ fun EditPersonScreen(
                 value = state.note,
                 onValueChange = actions.onNoteChange,
                 label = { Text("Note") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            GroupDropdown(
+                groups = state.groups,
+                selectedGroupId = state.selectedGroupId,
+                onGroupSelected = actions.onGroupSelected,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -210,12 +218,59 @@ private fun DayDropdown(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GroupDropdown(
+    groups: List<Group>,
+    selectedGroupId: Long?,
+    onGroupSelected: (Long?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedLabel = groups.find { it.id == selectedGroupId }?.name ?: "No group"
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier,
+    ) {
+        OutlinedTextField(
+            value = selectedLabel,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Group") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(),
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text("No group") },
+                onClick = {
+                    onGroupSelected(null)
+                    expanded = false
+                },
+            )
+            groups.forEach { group ->
+                DropdownMenuItem(
+                    text = { Text(group.name) },
+                    onClick = {
+                        onGroupSelected(group.id)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
 private val previewActions = EditPersonActions(
     onNameChange = {},
     onMonthChange = {},
     onDayChange = {},
     onYearChange = {},
     onNoteChange = {},
+    onGroupSelected = {},
     onSaveClick = {},
     onBackClick = {},
 )

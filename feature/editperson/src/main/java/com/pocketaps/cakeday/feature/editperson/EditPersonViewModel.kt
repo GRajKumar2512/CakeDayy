@@ -3,6 +3,7 @@ package com.pocketaps.cakeday.feature.editperson
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pocketaps.cakeday.core.domain.usecase.ObserveGroupsUseCase
 import com.pocketaps.cakeday.core.domain.usecase.ObservePersonUseCase
 import com.pocketaps.cakeday.core.domain.usecase.SavePersonUseCase
 import com.pocketaps.cakeday.core.model.Person
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -23,6 +26,7 @@ import javax.inject.Inject
 class EditPersonViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val observePerson: ObservePersonUseCase,
+    observeGroups: ObserveGroupsUseCase,
     private val savePerson: SavePersonUseCase,
 ) : ViewModel() {
 
@@ -37,6 +41,8 @@ class EditPersonViewModel @Inject constructor(
     val effect: Flow<EditPersonEffect> = effectChannel.receiveAsFlow()
 
     init {
+        observeGroups().onEach { groups -> _uiState.update { it.copy(groups = groups) } }.launchIn(viewModelScope)
+
         val id = personId
         if (id != null) {
             viewModelScope.launch {
@@ -51,6 +57,7 @@ class EditPersonViewModel @Inject constructor(
                             birthDay = person.birthDay,
                             birthYear = person.birthYear,
                             note = person.note.orEmpty(),
+                            selectedGroupId = person.groupId,
                         )
                     }
                 } else {
@@ -95,6 +102,10 @@ class EditPersonViewModel @Inject constructor(
         _uiState.update { it.copy(note = note) }
     }
 
+    fun onGroupSelected(groupId: Long?) {
+        _uiState.update { it.copy(selectedGroupId = groupId) }
+    }
+
     fun onSaveClick() {
         val state = _uiState.value
         if (state.name.isBlank()) {
@@ -108,6 +119,7 @@ class EditPersonViewModel @Inject constructor(
             birthDay = state.birthDay,
             birthYear = state.birthYear,
             note = state.note.ifBlank { null },
+            groupId = state.selectedGroupId,
         )
 
         viewModelScope.launch {

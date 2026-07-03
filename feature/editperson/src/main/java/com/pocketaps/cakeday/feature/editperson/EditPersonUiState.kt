@@ -1,5 +1,6 @@
 package com.pocketaps.cakeday.feature.editperson
 
+import com.pocketaps.cakeday.core.model.Group
 import java.time.LocalDate
 
 data class EditPersonUiState(
@@ -11,6 +12,8 @@ data class EditPersonUiState(
     val birthDay: Int = 1,
     val birthYear: Int? = null,
     val note: String = "",
+    val groups: List<Group> = emptyList(),
+    val selectedGroupId: Long? = null,
 ) {
     val isAddMode: Boolean get() = personId == null
 }
@@ -25,6 +28,7 @@ data class EditPersonActions(
     val onDayChange: (Int) -> Unit,
     val onYearChange: (String) -> Unit,
     val onNoteChange: (String) -> Unit,
+    val onGroupSelected: (Long?) -> Unit,
     val onSaveClick: () -> Unit,
     val onBackClick: () -> Unit,
 )

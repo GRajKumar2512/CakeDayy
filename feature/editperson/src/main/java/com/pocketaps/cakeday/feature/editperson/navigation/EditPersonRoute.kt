@@ -36,6 +36,7 @@ fun NavGraphBuilder.editPersonScreen(onNavigateBack: () -> Unit) {
                 onDayChange = viewModel::onDayChange,
                 onYearChange = viewModel::onYearChange,
                 onNoteChange = viewModel::onNoteChange,
+                onGroupSelected = viewModel::onGroupSelected,
                 onSaveClick = viewModel::onSaveClick,
                 onBackClick = onNavigateBack,
             ),
