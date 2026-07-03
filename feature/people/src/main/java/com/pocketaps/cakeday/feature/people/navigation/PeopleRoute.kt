@@ -19,6 +19,8 @@ fun NavGraphBuilder.peopleScreen(
     onAddPerson: () -> Unit,
     onEditPerson: (Long) -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenGroups: () -> Unit,
+    onOpenImportContacts: () -> Unit,
 ) {
     composable<PeopleRoute> {
         val viewModel = hiltViewModel<PeopleViewModel>()
@@ -30,6 +32,8 @@ fun NavGraphBuilder.peopleScreen(
                     PeopleEffect.NavigateToAdd -> onAddPerson()
                     is PeopleEffect.NavigateToEdit -> onEditPerson(effect.personId)
                     PeopleEffect.NavigateToSettings -> onOpenSettings()
+                    PeopleEffect.NavigateToGroups -> onOpenGroups()
+                    PeopleEffect.NavigateToImportContacts -> onOpenImportContacts()
                 }
             }
         }
@@ -41,6 +45,10 @@ fun NavGraphBuilder.peopleScreen(
                 onPersonClick = viewModel::onPersonClick,
                 onDeleteClick = viewModel::onDeletePerson,
                 onSettingsClick = viewModel::onSettingsClick,
+                onManageGroupsClick = viewModel::onManageGroupsClick,
+                onImportContactsClick = viewModel::onImportContactsClick,
+                onQueryChange = viewModel::onQueryChange,
+                onGroupFilterSelected = viewModel::onGroupFilterSelected,
             ),
         )
     }

@@ -3,9 +3,15 @@ package com.pocketaps.cakeday.feature.people
 import app.cash.turbine.test
 import com.pocketaps.cakeday.core.domain.usecase.DeletePersonUseCase
 import com.pocketaps.cakeday.core.domain.usecase.GetUpcomingBirthdaysUseCase
+import com.pocketaps.cakeday.core.domain.usecase.ObserveGroupsUseCase
+import com.pocketaps.cakeday.core.domain.usecase.SearchPeopleUseCase
+import com.pocketaps.cakeday.core.model.Group
 import com.pocketaps.cakeday.core.model.Person
+import com.pocketaps.cakeday.core.testing.fake.FakeGroupRepository
 import com.pocketaps.cakeday.core.testing.fake.FakePersonRepository
 import com.pocketaps.cakeday.core.testing.rule.MainDispatcherRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -14,55 +20,60 @@ import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PeopleViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private lateinit var fakeRepo: FakePersonRepository
+    private lateinit var fakePersonRepo: FakePersonRepository
+    private lateinit var fakeGroupRepo: FakeGroupRepository
     private lateinit var viewModel: PeopleViewModel
 
     @Before
     fun setUp() {
-        fakeRepo = FakePersonRepository()
+        fakePersonRepo = FakePersonRepository()
+        fakeGroupRepo = FakeGroupRepository()
         viewModel = PeopleViewModel(
-            getUpcomingBirthdays = GetUpcomingBirthdaysUseCase(fakeRepo),
-            deletePerson = DeletePersonUseCase(fakeRepo),
+            searchPeople = SearchPeopleUseCase(GetUpcomingBirthdaysUseCase(fakePersonRepo)),
+            observeGroups = ObserveGroupsUseCase(fakeGroupRepo),
+            deletePerson = DeletePersonUseCase(fakePersonRepo),
         )
     }
 
     @Test
-    fun `state is empty when repository has no people`() = runTest {
+    fun `state is empty content when repository has no people`() = runTest {
         viewModel.uiState.test {
-            assertEquals(PeopleUiState.Empty, awaitItem())
+            val state = awaitItem() as PeopleUiState.Content
+            assertTrue(state.people.isEmpty())
+            assertTrue(!state.isFiltering)
         }
     }
 
     @Test
     fun `state is content when repository has people`() = runTest {
         val today = LocalDate.now()
-        fakeRepo.setAll(
+        fakePersonRepo.setAll(
             listOf(Person(id = 1L, name = "Alice", birthMonth = today.monthValue, birthDay = today.dayOfMonth)),
         )
 
         viewModel.uiState.test {
-            val state = awaitItem()
-            assertTrue(state is PeopleUiState.Content)
-            assertEquals(1, (state as PeopleUiState.Content).people.size)
+            val state = awaitItem() as PeopleUiState.Content
+            assertEquals(1, state.people.size)
         }
     }
 
     @Test
-    fun `deleting a person removes it and content transitions to empty`() = runTest {
+    fun `deleting a person removes it from the list`() = runTest {
         val today = LocalDate.now()
-        fakeRepo.setAll(
+        fakePersonRepo.setAll(
             listOf(Person(id = 1L, name = "Alice", birthMonth = today.monthValue, birthDay = today.dayOfMonth)),
         )
 
         viewModel.uiState.test {
-            assertTrue(awaitItem() is PeopleUiState.Content)
+            assertEquals(1, (awaitItem() as PeopleUiState.Content).people.size)
             viewModel.onDeletePerson(1L)
-            assertEquals(PeopleUiState.Empty, awaitItem())
+            assertTrue((awaitItem() as PeopleUiState.Content).people.isEmpty())
         }
     }
 
@@ -87,6 +98,84 @@ class PeopleViewModelTest {
         viewModel.effect.test {
             viewModel.onSettingsClick()
             assertEquals(PeopleEffect.NavigateToSettings, awaitItem())
+        }
+    }
+
+    @Test
+    fun `manage groups click emits NavigateToGroups effect`() = runTest {
+        viewModel.effect.test {
+            viewModel.onManageGroupsClick()
+            assertEquals(PeopleEffect.NavigateToGroups, awaitItem())
+        }
+    }
+
+    @Test
+    fun `import contacts click emits NavigateToImportContacts effect`() = runTest {
+        viewModel.effect.test {
+            viewModel.onImportContactsClick()
+            assertEquals(PeopleEffect.NavigateToImportContacts, awaitItem())
+        }
+    }
+
+    @Test
+    fun `query changes are debounced before filtering the list`() = runTest {
+        val today = LocalDate.now()
+        fakePersonRepo.setAll(
+            listOf(
+                Person(id = 1L, name = "Alice", birthMonth = today.monthValue, birthDay = today.dayOfMonth),
+                Person(id = 2L, name = "Bob", birthMonth = today.monthValue, birthDay = today.dayOfMonth),
+            ),
+        )
+
+        viewModel.uiState.test {
+            assertEquals(2, (awaitItem() as PeopleUiState.Content).people.size)
+
+            viewModel.onQueryChange("ali")
+            advanceTimeBy(100)
+            expectNoEvents()
+
+            advanceTimeBy(250)
+            val filtered = awaitItem() as PeopleUiState.Content
+            assertEquals(1, filtered.people.size)
+            assertEquals("Alice", filtered.people[0].person.name)
+        }
+    }
+
+    @Test
+    fun `search and group filter compose together`() = runTest {
+        val today = LocalDate.now()
+        fakePersonRepo.setAll(
+            listOf(
+                Person(
+                    id = 1L,
+                    name = "Alice",
+                    birthMonth = today.monthValue,
+                    birthDay = today.dayOfMonth,
+                    groupId = 1L,
+                ),
+                Person(
+                    id = 2L,
+                    name = "Alicia",
+                    birthMonth = today.monthValue,
+                    birthDay = today.dayOfMonth,
+                    groupId = 2L,
+                ),
+            ),
+        )
+        fakeGroupRepo.setAll(listOf(Group(id = 1L, name = "Family", colorHex = "#F44336")))
+
+        viewModel.uiState.test {
+            assertEquals(2, (awaitItem() as PeopleUiState.Content).people.size)
+
+            viewModel.onGroupFilterSelected(1L)
+            val groupFiltered = awaitItem() as PeopleUiState.Content
+            assertEquals(1, groupFiltered.people.size)
+
+            viewModel.onQueryChange("ali")
+            advanceTimeBy(350)
+            val combined = awaitItem() as PeopleUiState.Content
+            assertEquals(1, combined.people.size)
+            assertEquals("Alice", combined.people[0].person.name)
         }
     }
 }
