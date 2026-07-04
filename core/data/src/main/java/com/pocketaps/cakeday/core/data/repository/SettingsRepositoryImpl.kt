@@ -3,6 +3,7 @@ package com.pocketaps.cakeday.core.data.repository
 import com.pocketaps.cakeday.core.datastore.UserPreferencesDataStore
 import com.pocketaps.cakeday.core.domain.repository.SettingsRepository
 import com.pocketaps.cakeday.core.model.ReminderLead
+import com.pocketaps.cakeday.core.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -14,5 +15,11 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setReminderLead(lead: ReminderLead) {
         userPreferencesDataStore.setReminderLead(lead)
+    }
+
+    override fun observeThemeMode(): Flow<ThemeMode> = userPreferencesDataStore.themeMode
+
+    override suspend fun setThemeMode(mode: ThemeMode) {
+        userPreferencesDataStore.setThemeMode(mode)
     }
 }

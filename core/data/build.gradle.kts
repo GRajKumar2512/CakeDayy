@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.cakeday.android.library)
     alias(libs.plugins.cakeday.android.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -20,6 +21,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(project(":core:testing"))
     testImplementation(libs.junit)
