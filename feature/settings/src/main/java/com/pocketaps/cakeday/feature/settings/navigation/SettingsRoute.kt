@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.pocketaps.cakeday.feature.settings.SettingsActions
 import com.pocketaps.cakeday.feature.settings.SettingsScreen
 import com.pocketaps.cakeday.feature.settings.SettingsViewModel
 import kotlinx.serialization.Serializable
@@ -22,7 +23,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object SettingsRoute
 
-fun NavGraphBuilder.settingsScreen(onNavigateBack: () -> Unit) {
+fun NavGraphBuilder.settingsScreen(onNavigateBack: () -> Unit, onOpenBackup: () -> Unit) {
     composable<SettingsRoute> {
         val viewModel = hiltViewModel<SettingsViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -36,18 +37,22 @@ fun NavGraphBuilder.settingsScreen(onNavigateBack: () -> Unit) {
         SettingsScreen(
             state = state,
             showPermissionRationale = showPermissionRationale,
-            onLeadSelected = { lead ->
-                viewModel.onLeadSelected(lead)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS,
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            },
-            onBackClick = onNavigateBack,
+            actions = SettingsActions(
+                onLeadSelected = { lead ->
+                    viewModel.onLeadSelected(lead)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.POST_NOTIFICATIONS,
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                },
+                onThemeModeSelected = viewModel::onThemeModeSelected,
+                onOpenBackup = onOpenBackup,
+                onBackClick = onNavigateBack,
+            ),
         )
     }
 }

@@ -2,6 +2,7 @@ package com.pocketaps.cakeday.feature.settings
 
 import app.cash.turbine.test
 import com.pocketaps.cakeday.core.model.ReminderLead
+import com.pocketaps.cakeday.core.model.ThemeMode
 import com.pocketaps.cakeday.core.testing.fake.FakeSettingsRepository
 import com.pocketaps.cakeday.core.testing.rule.MainDispatcherRule
 import kotlinx.coroutines.flow.first
@@ -44,5 +45,17 @@ class SettingsViewModelTest {
             assertEquals(ReminderLead.ONE_WEEK_BEFORE, awaitItem().selectedLead)
         }
         assertEquals(ReminderLead.ONE_WEEK_BEFORE, fakeRepo.observeReminderLead().first())
+    }
+
+    @Test
+    fun `selecting a theme mode persists it and re-emits`() = runTest {
+        viewModel.uiState.test {
+            assertEquals(ThemeMode.SYSTEM, awaitItem().themeMode)
+
+            viewModel.onThemeModeSelected(ThemeMode.DARK)
+
+            assertEquals(ThemeMode.DARK, awaitItem().themeMode)
+        }
+        assertEquals(ThemeMode.DARK, fakeRepo.observeThemeMode().first())
     }
 }
