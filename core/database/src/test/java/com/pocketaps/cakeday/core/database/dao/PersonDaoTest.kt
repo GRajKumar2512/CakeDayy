@@ -82,4 +82,34 @@ class PersonDaoTest {
             cancel()
         }
     }
+
+    @Test
+    fun `getAllIncludingDeleted includes soft-deleted rows`() = runBlocking {
+        dao.upsert(entity(id = 1, name = "Alice"))
+        dao.upsert(entity(id = 2, name = "Bob"))
+        dao.softDelete(2, updatedAt = 2_000L)
+
+        val all = dao.getAllIncludingDeleted()
+
+        assertEquals(2, all.size)
+        assertTrue(all.any { it.name == "Bob" && it.isDeleted })
+    }
+
+    @Test
+    fun `deleteAll empties the table`() = runBlocking {
+        dao.upsert(entity(id = 1, name = "Alice"))
+        dao.deleteAll()
+        assertTrue(dao.getAllIncludingDeleted().isEmpty())
+    }
+
+    @Test
+    fun `insertAll bulk-inserts with explicit ids preserved`() = runBlocking {
+        dao.insertAll(listOf(entity(id = 1, name = "Alice"), entity(id = 2, name = "Bob")))
+
+        val all = dao.getAllIncludingDeleted()
+
+        assertEquals(2, all.size)
+        assertEquals("Alice", all.first { it.id == 1L }.name)
+        assertEquals("Bob", all.first { it.id == 2L }.name)
+    }
 }

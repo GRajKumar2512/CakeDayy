@@ -81,4 +81,34 @@ class GroupDaoTest {
             cancel()
         }
     }
+
+    @Test
+    fun `getAllIncludingDeleted includes soft-deleted rows`() = runBlocking {
+        dao.upsert(entity(id = 1, name = "Family"))
+        dao.upsert(entity(id = 2, name = "Work"))
+        dao.softDelete(2, updatedAt = 2_000L)
+
+        val all = dao.getAllIncludingDeleted()
+
+        assertEquals(2, all.size)
+        assertTrue(all.any { it.name == "Work" && it.isDeleted })
+    }
+
+    @Test
+    fun `deleteAll empties the table`() = runBlocking {
+        dao.upsert(entity(id = 1, name = "Family"))
+        dao.deleteAll()
+        assertTrue(dao.getAllIncludingDeleted().isEmpty())
+    }
+
+    @Test
+    fun `insertAll bulk-inserts with explicit ids preserved`() = runBlocking {
+        dao.insertAll(listOf(entity(id = 1, name = "Family"), entity(id = 2, name = "Work")))
+
+        val all = dao.getAllIncludingDeleted()
+
+        assertEquals(2, all.size)
+        assertEquals("Family", all.first { it.id == 1L }.name)
+        assertEquals("Work", all.first { it.id == 2L }.name)
+    }
 }

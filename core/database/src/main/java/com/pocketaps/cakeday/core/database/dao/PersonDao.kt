@@ -1,6 +1,8 @@
 package com.pocketaps.cakeday.core.database.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import com.pocketaps.cakeday.core.database.entity.PersonEntity
@@ -12,6 +14,9 @@ interface PersonDao {
     @Query("SELECT * FROM person WHERE isDeleted = 0")
     fun observeAll(): Flow<List<PersonEntity>>
 
+    @Query("SELECT * FROM person")
+    suspend fun getAllIncludingDeleted(): List<PersonEntity>
+
     @Upsert
     suspend fun upsert(entity: PersonEntity)
 
@@ -20,4 +25,10 @@ interface PersonDao {
 
     @Query("UPDATE person SET groupId = NULL, updatedAt = :updatedAt WHERE groupId = :groupId")
     suspend fun clearGroupAssignments(groupId: Long, updatedAt: Long)
+
+    @Query("DELETE FROM person")
+    suspend fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertAll(entities: List<PersonEntity>)
 }

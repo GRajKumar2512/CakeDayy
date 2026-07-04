@@ -23,4 +23,14 @@ abstract class CakeDayyDatabase : RoomDatabase() {
         groupDao().softDelete(groupId, updatedAt)
         personDao().clearGroupAssignments(groupId, updatedAt)
     }
+
+    // A backup restore must be atomic: if inserting the imported rows fails partway through
+    // (e.g. a malformed backup with duplicate ids), the prior deleteAll() calls must also roll
+    // back, otherwise the user is left with an empty database.
+    suspend fun replaceAllData(people: List<PersonEntity>, groups: List<GroupEntity>) = withTransaction {
+        personDao().deleteAll()
+        groupDao().deleteAll()
+        groupDao().insertAll(groups)
+        personDao().insertAll(people)
+    }
 }
