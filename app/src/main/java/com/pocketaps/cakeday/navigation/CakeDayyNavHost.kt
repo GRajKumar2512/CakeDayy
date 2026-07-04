@@ -12,6 +12,8 @@ import com.pocketaps.cakeday.feature.people.contactsimport.navigation.ImportCont
 import com.pocketaps.cakeday.feature.people.contactsimport.navigation.importContactsScreen
 import com.pocketaps.cakeday.feature.people.navigation.PeopleRoute
 import com.pocketaps.cakeday.feature.people.navigation.peopleScreen
+import com.pocketaps.cakeday.feature.settings.backup.navigation.BackupRoute
+import com.pocketaps.cakeday.feature.settings.backup.navigation.backupScreen
 import com.pocketaps.cakeday.feature.settings.navigation.SettingsRoute
 import com.pocketaps.cakeday.feature.settings.navigation.settingsScreen
 
@@ -29,6 +31,10 @@ fun CakeDayyNavHost(navController: NavHostController = rememberNavController()) 
             onNavigateBack = { navController.popBackStack() },
         )
         settingsScreen(
+            onNavigateBack = { navController.popBackStack() },
+            onOpenBackup = { navController.navigate(BackupRoute) },
+        )
+        backupScreen(
             onNavigateBack = { navController.popBackStack() },
         )
         groupsScreen(
