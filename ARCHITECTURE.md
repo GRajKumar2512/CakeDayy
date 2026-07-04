@@ -33,8 +33,9 @@ Trade-off (documented honestly in the README): more Gradle boilerplate and more 
 
 ```
 :app
- ├─ depends on every :feature, plus :core:designsystem, :core:notifications
- │   (hosts navigation, Application class, Hilt root, widget registration)
+ ├─ depends on every :feature, plus :core:designsystem, :core:notifications, :core:domain
+ │   (hosts navigation, Application class, Hilt root, widget registration;
+ │    depends on :core:domain directly to observe SettingsRepository for live theme switching)
  │
 :feature:people        ─┐
 :feature:editperson     ├─▶ :core:domain ─▶ :core:model
@@ -60,8 +61,8 @@ Key rule: **features never depend on each other**, and **features never depend o
 | Module | Responsibility |
 |---|---|
 | `:app` | DI root, navigation host, `Application`, widget + worker registration. The composition root. |
-| `:core:model` | Pure Kotlin domain models (`Person`, `Group`, `ReminderLead`). No framework deps. |
-| `:core:domain` | Repository *interfaces* + use cases (`GetUpcomingBirthdaysUseCase`, `SchedulePerson...`, date math). Pure Kotlin. |
+| `:core:model` | Pure Kotlin domain models (`Person`, `Group`, `ReminderLead`, `ThemeMode`). No framework deps. |
+| `:core:domain` | Repository *interfaces* (including `BackupRepository`) + use cases (`GetUpcomingBirthdaysUseCase`, `ExportDataUseCase`/`ImportDataUseCase`, date math). Pure Kotlin. |
 | `:core:data` | Repository *implementations*, mappers, single-source-of-truth logic. |
 | `:core:database` | Room — entities, DAOs, `RoomDatabase`, type converters, migrations. |
 | `:core:datastore` | Preferences DataStore for settings (theme, reminder lead). |
