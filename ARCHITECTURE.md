@@ -136,6 +136,7 @@ When the Go backend arrives, we add a `RemoteDataSource` and a `SyncWorker` that
 - **Notifications:** dedicated channel; request `POST_NOTIFICATIONS` at a natural moment (when the user first enables reminders), with a rationale, not at cold start.
 - **Permissions:** contacts import requests `READ_CONTACTS` lazily at the point of use, with a graceful denied state.
 - **Navigation:** type-safe Navigation Compose; each feature owns its destination and exposes an entry function.
+- **Widget refresh:** the Glance widget is refreshed from `:app` only, keeping `:feature:*`/`:core:data` free of any `:widget` dependency. Two triggers, merged: Room's `Flow` from `GetUpcomingBirthdaysUseCase` already re-emits on any write to the person table (add/edit/delete/contacts-import/backup-import all covered for free, since Room's invalidation tracker is table-based, not tied to a specific write's call site), and the existing M3 daily `PeriodicWorkRequest`'s `RUNNING → not-RUNNING` transition (a periodic work's `WorkInfo` never reaches `SUCCEEDED`, so this falling edge is the correct "a run just completed" signal) catches the case where the day rolls over with no data change. No second worker is added.
 
 ## 8. Tech stack
 
