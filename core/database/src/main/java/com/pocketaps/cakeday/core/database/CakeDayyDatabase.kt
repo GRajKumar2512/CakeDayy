@@ -11,7 +11,7 @@ import com.pocketaps.cakeday.core.database.entity.PersonEntity
 @Database(
     entities = [PersonEntity::class, GroupEntity::class],
     version = 2,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class CakeDayyDatabase : RoomDatabase() {
     abstract fun personDao(): PersonDao

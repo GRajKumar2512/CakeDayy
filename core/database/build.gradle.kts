@@ -10,6 +10,13 @@ android {
             isIncludeAndroidResources = true
         }
     }
+    sourceSets {
+        getByName("test").assets.srcDir("$projectDir/schemas")
+    }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
