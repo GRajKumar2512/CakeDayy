@@ -35,6 +35,7 @@ dependencies {
     implementation(project(":feature:groups"))
     implementation(project(":feature:settings"))
     implementation(project(":widget"))
+    implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
