@@ -26,7 +26,10 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
             }
-            CakeDayyTheme(darkTheme = darkTheme) {
+            CakeDayyTheme(
+                darkTheme = darkTheme,
+                dynamicColor = themeMode == ThemeMode.SYSTEM
+            ) {
                 CakeDayyNavHost()
             }
         }
