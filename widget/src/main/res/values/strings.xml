@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_label">CakeDayy</string>
+    <string name="widget_description">Shows your next few upcoming birthdays.</string>
+    <string name="widget_loading">Loading…</string>
+    <string name="widget_title">Upcoming Birthdays</string>
+    <string name="widget_empty">No upcoming birthdays</string>
+    <string name="widget_error">Couldn\'t load birthdays</string>
+</resources>

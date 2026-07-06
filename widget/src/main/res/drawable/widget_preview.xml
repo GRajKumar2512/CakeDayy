@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="160dp"
+    android:viewportWidth="240"
+    android:viewportHeight="160">
+    <path
+        android:fillColor="#FFFBFF"
+        android:pathData="M0,0h240v160h-240z" />
+    <!-- plate -->
+    <path
+        android:fillColor="#F3DDE1"
+        android:pathData="M60,120h120v10a60,10 0 0 1 -120,0z" />
+    <!-- cake body -->
+    <path
+        android:fillColor="#C2185B"
+        android:pathData="M75,80h90v40h-90z" />
+    <!-- frosting band -->
+    <path
+        android:fillColor="#FFD9E1"
+        android:pathData="M75,80h90v10h-90z" />
+    <!-- candle -->
+    <path
+        android:fillColor="#8B6D00"
+        android:pathData="M117,60h6v20h-6z" />
+    <!-- flame -->
+    <path
+        android:fillColor="#F4BD48"
+        android:pathData="M120,44 c5,6 5,12 0,16 c-5,-4 -5,-10 0,-16z" />
+</vector>
