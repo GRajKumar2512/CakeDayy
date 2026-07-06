@@ -51,7 +51,7 @@ Trade-off (documented honestly in the README): more Gradle boilerplate and more 
 :core:designsystem ─▶ (Compose/Material3 only)
 :core:ui ─▶ :core:designsystem, :core:model
 :core:common ─▶ (kotlin/coroutines only)
-:core:testing ─▶ :core:domain, :core:data   (test-only fakes & rules)
+:core:testing ─▶ :core:domain   (test-only fakes & rules, all against domain interfaces)
 ```
 
 Key rule: **features never depend on each other**, and **features never depend on `:core:data`/`:core:database` directly** — only on `:core:domain`. The `:app` module is the only place wiring happens (it provides repository implementations from `:core:data` via Hilt).
